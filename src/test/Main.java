@@ -11,11 +11,11 @@ public class Main {
         jsonFile.saveFile(object);
 
 
-       // Obj obj = new Obj();
+        // Obj obj = new Obj();
 
-     //   jsonFile.readObject(obj);
+        //   jsonFile.readObject(obj);
 
-     //   System.out.println(obj.obj2.name);
+        //   System.out.println(obj.obj2.name);
 
     }
 }

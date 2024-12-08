@@ -4,6 +4,7 @@ package ru.cazmusw.json;
 import ru.cazmusw.json.advanced.ObjectReader;
 import ru.cazmusw.json.reader.JsonParser;
 import ru.cazmusw.json.reader.JsonReader;
+import ru.cazmusw.json.utils.JsonConstants;
 import ru.cazmusw.json.utils.JsonObject;
 import ru.cazmusw.json.writer.JsonWriter;
 
@@ -23,7 +24,7 @@ public class JsonFile {
         try {
             boolean isCreated = this.file.createNewFile();
 
-            if(!isCreated) {
+            if (!isCreated) {
                 System.err.println("Неизвестная ошибка! Не получилось создать файл " + this.file.getAbsolutePath());
             }
 
@@ -39,7 +40,7 @@ public class JsonFile {
         JsonObject jsonObject = this.readAsJsonObject();
 
         if (jsonObject == null) {
-            System.out.println("Ошибка! Джсон файл пуст!");
+            System.out.println("Ошибка! Json-файл пуст!");
             return;
         }
 
@@ -49,7 +50,6 @@ public class JsonFile {
             objectReader.parseObjectType(object, jsonObject);
         } catch (Exception e) {
             System.out.println("Ошибка! Не удалось прочитать Json-файл!");
-            e.printStackTrace();
         }
 
 
@@ -76,7 +76,7 @@ public class JsonFile {
 
         if (json.isEmpty()) return null;
 
-        if (!json.startsWith("{") || !json.endsWith("}")) {
+        if (!json.startsWith(String.valueOf(JsonConstants.SECTION_START)) || !json.endsWith(String.valueOf(JsonConstants.SECTION_END))) {
             System.out.println("Ошибка! Файл не является json-файлом!");
             return null;
         }

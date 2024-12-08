@@ -3,7 +3,9 @@ package ru.cazmusw.json.writer;
 import ru.cazmusw.json.utils.JsonConstants;
 import ru.cazmusw.json.utils.JsonObject;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.List;
 
@@ -43,15 +45,15 @@ public class JsonWriter {
     }
 
     public void writeData(StringBuilder builder, Object object, int amount) {
-        if(object instanceof JsonObject) {
+        if (object instanceof JsonObject) {
 
             builder.append(this.writeSection((JsonObject) object, amount + 2));
 
-        } else if(object instanceof List) {
+        } else if (object instanceof List) {
 
             builder.append(writeArray((List<?>) object, amount + 2));
 
-        } else if(object instanceof String) {
+        } else if (object instanceof String) {
 
             builder.append(JsonConstants.STRING_STORAGE);
             builder.append(object);
@@ -71,7 +73,7 @@ public class JsonWriter {
 
         int index = 0;
 
-        for(Object value : list) {
+        for (Object value : list) {
 
             boolean isNeedSeparator = index != list.size() - 1;
 
@@ -79,7 +81,7 @@ public class JsonWriter {
 
             this.writeData(result, value, amount);
 
-            if(isNeedSeparator) {
+            if (isNeedSeparator) {
                 result.append(JsonConstants.SEPARATOR);
             }
 
@@ -104,7 +106,7 @@ public class JsonWriter {
 
         HashMap<String, Object> data = jsonObject.getData();
 
-        for(String str : data.keySet()) {
+        for (String str : data.keySet()) {
 
             Object value = data.get(str);
             boolean isNeedSeparator = index != data.size() - 1;
@@ -118,7 +120,7 @@ public class JsonWriter {
 
             this.writeData(result, value, amount);
 
-            if(isNeedSeparator) {
+            if (isNeedSeparator) {
                 result.append(JsonConstants.SEPARATOR);
             }
 
