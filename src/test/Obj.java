@@ -5,7 +5,7 @@ public class Obj {
     public double gg;
     @JsonSection(title = "hh")
     public boolean hh;
-    @JsonSection(title = "obj2")
+    @JsonSection(title = "dsfsdf")
     public Obj2 obj2;
 
 

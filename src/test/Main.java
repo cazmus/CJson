@@ -2,20 +2,32 @@ import ru.cazmusw.json.JsonFile;
 import ru.cazmusw.json.utils.JsonObject;
 
 import java.io.File;
+import java.util.Random;
 
 public class Main {
     public static void main(String[] args) {
         JsonFile jsonFile = new JsonFile(new File("simple.json"));
 
         JsonObject object = jsonFile.readAsJsonObject();
+
+        System.out.println("Исходный объект: " + object.toString());
+
+        object.addObject("newobvxvcj", new Random().nextInt() % 200);
+
         jsonFile.saveFile(object);
 
+        object = jsonFile.readAsJsonObject();
 
-        // Obj obj = new Obj();
+        System.out.println("После изменений объект: " + object.toString());
 
-        //   jsonFile.readObject(obj);
+        jsonFile = new JsonFile(new File("simple2.json"));
 
-        //   System.out.println(obj.obj2.name);
+        Obj obj = new Obj();
+
+        //Данная функция находится ещё в разработке, не работает с многомерными массивами и списками
+        jsonFile.readObject(obj);
+
+        System.out.println("Пример чтения данных и автоматической записи их в объект " + obj.obj2.name + " " + obj.gg + " " + obj.hh);
 
     }
 }
