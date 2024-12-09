@@ -1,10 +1,20 @@
 package ru.cazmusw.json.advanced;
 
+import ru.cazmusw.json.advanced.adapter.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public enum ObjectAdapters {
-    ;
+    BOOLEAN(new BooleanObjectAdapter()),
+    BYTE(new ByteObjectAdapter()),
+    CHAR(new CharObjectAdapter()),
+    DOUBLE(new DoubleObjectAdapter()),
+    FLOAT(new FloatObjectAdapter()),
+    INTEGER(new IntegerObjectAdapter()),
+    LONG(new LongObjectAdapter()),
+    SHORT(new ShortObjectAdapter()),
+    STRING(new StringObjectAdapter());
 
     private static final List<IObjectAdapter> usersAdapters = new ArrayList<>();
     public final IObjectAdapter objectAdapter;

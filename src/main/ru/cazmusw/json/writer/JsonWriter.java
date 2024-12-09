@@ -1,6 +1,6 @@
 package ru.cazmusw.json.writer;
 
-import ru.cazmusw.json.utils.JsonConstants;
+import ru.cazmusw.json.utils.JsonToken;
 import ru.cazmusw.json.utils.JsonObject;
 
 import java.io.BufferedWriter;
@@ -38,7 +38,7 @@ public class JsonWriter {
         StringBuilder result = new StringBuilder();
 
         for (int i = 0; i < count; i++) {
-            result.append(JsonConstants.WHITE_SPACE);
+            result.append(JsonToken.WHITE_SPACE);
         }
 
         return result.toString();
@@ -55,9 +55,9 @@ public class JsonWriter {
 
         } else if (object instanceof String) {
 
-            builder.append(JsonConstants.STRING_STORAGE);
+            builder.append(JsonToken.STRING_STORAGE);
             builder.append(object);
-            builder.append(JsonConstants.STRING_STORAGE);
+            builder.append(JsonToken.STRING_STORAGE);
 
         } else {
             builder.append(object);
@@ -68,8 +68,8 @@ public class JsonWriter {
     public String writeArray(List<?> list, int amount) {
         StringBuilder result = new StringBuilder();
 
-        result.append(JsonConstants.ARRAY_START);
-        result.append(JsonConstants.NEW_LINE);
+        result.append(JsonToken.ARRAY_START);
+        result.append(JsonToken.NEW_LINE);
 
         int index = 0;
 
@@ -82,16 +82,16 @@ public class JsonWriter {
             this.writeData(result, value, amount);
 
             if (isNeedSeparator) {
-                result.append(JsonConstants.SEPARATOR);
+                result.append(JsonToken.SEPARATOR);
             }
 
-            result.append(JsonConstants.NEW_LINE);
+            result.append(JsonToken.NEW_LINE);
 
             index++;
         }
 
         result.append(this.getWhiteSpaceString(amount));
-        result.append(JsonConstants.ARRAY_END);
+        result.append(JsonToken.ARRAY_END);
 
         return result.toString();
     }
@@ -99,8 +99,8 @@ public class JsonWriter {
     public String writeSection(JsonObject jsonObject, int amount) {
         StringBuilder result = new StringBuilder();
 
-        result.append(JsonConstants.SECTION_START);
-        result.append(JsonConstants.NEW_LINE);
+        result.append(JsonToken.SECTION_START);
+        result.append(JsonToken.NEW_LINE);
 
         int index = 0;
 
@@ -112,25 +112,25 @@ public class JsonWriter {
             boolean isNeedSeparator = index != data.size() - 1;
 
             result.append(this.getWhiteSpaceString(amount + 2));
-            result.append(JsonConstants.STRING_STORAGE);
+            result.append(JsonToken.STRING_STORAGE);
             result.append(str);
-            result.append(JsonConstants.STRING_STORAGE);
-            result.append(JsonConstants.KEY_VALUE_SEPARATOR);
+            result.append(JsonToken.STRING_STORAGE);
+            result.append(JsonToken.VALUE_SEPARATOR);
             result.append(this.getWhiteSpaceString(1));
 
             this.writeData(result, value, amount);
 
             if (isNeedSeparator) {
-                result.append(JsonConstants.SEPARATOR);
+                result.append(JsonToken.SEPARATOR);
             }
 
-            result.append(JsonConstants.NEW_LINE);
+            result.append(JsonToken.NEW_LINE);
 
             index++;
         }
 
         result.append(this.getWhiteSpaceString(amount));
-        result.append(JsonConstants.SECTION_END);
+        result.append(JsonToken.SECTION_END);
 
         return result.toString();
 

@@ -4,7 +4,7 @@ package ru.cazmusw.json;
 import ru.cazmusw.json.advanced.ObjectReader;
 import ru.cazmusw.json.reader.JsonParser;
 import ru.cazmusw.json.reader.JsonReader;
-import ru.cazmusw.json.utils.JsonConstants;
+import ru.cazmusw.json.utils.JsonToken;
 import ru.cazmusw.json.utils.JsonObject;
 import ru.cazmusw.json.writer.JsonWriter;
 
@@ -74,7 +74,7 @@ public class JsonFile {
 
         if (json.isEmpty()) return null;
 
-        if (!json.startsWith(String.valueOf(JsonConstants.SECTION_START)) || !json.endsWith(String.valueOf(JsonConstants.SECTION_END))) {
+        if (!json.startsWith(String.valueOf(JsonToken.SECTION_START)) || !json.endsWith(String.valueOf(JsonToken.SECTION_END))) {
             System.out.println("Ошибка! Файл не является json-файлом!");
             return null;
         }

@@ -11,8 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-@Deprecated
 public class ObjectReader {
 
     public void parseObjectType(Object object, JsonObject jsonObject) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
@@ -27,8 +25,14 @@ public class ObjectReader {
     public void trySetValue(Object object, Field field, JsonObject jsonObject) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
         String title = field.getAnnotation(JsonSection.class).title();
 
-        if (field.getType().isPrimitive() || field.getType().isAssignableFrom(String.class)) {
-            field.set(object, this.getPrimaryTypeValue(field.getType(), jsonObject.getData().get(title)));
+        IObjectAdapter adapter = ObjectAdapters.getAllAdapters()
+                .stream()
+                .filter(objectAdapter -> objectAdapter.canAdapt(field.getType()))
+                .findFirst()
+                .orElse(null);
+
+        if (adapter != null) {
+            field.set(object, adapter.startAdapt(jsonObject.getData().get(title)));
         } else if (field.getType().isArray()) {
             field.set(object, this.parseArray((List<?>) jsonObject.getData().get(title), field.getType().getComponentType()));
         } else if (field.getType().isAssignableFrom(List.class) || field.getType().isAssignableFrom(ArrayList.class)) {
@@ -52,15 +56,20 @@ public class ObjectReader {
             if (type.isArray()) {
                 Array.set(resultArray, i, this.parseArray((List<?>) jsonValue, type.getComponentType()));
             } else {
-                Object elementValue = this.getPrimaryTypeValue(type, jsonValue);
 
-                if (elementValue == null) {
+                IObjectAdapter adapter = ObjectAdapters.getAllAdapters()
+                        .stream()
+                        .filter(objectAdapter -> objectAdapter.canAdapt(type))
+                        .findFirst()
+                        .orElse(null);
 
-                    elementValue = type.newInstance();
+                if(adapter != null) {
+                    Array.set(resultArray, i, adapter.startAdapt(jsonValue));
+                } else {
+                    Object elementValue = type.newInstance();
                     this.parseObjectType(elementValue, (JsonObject) jsonValue);
-
+                    Array.set(resultArray, i, elementValue);
                 }
-                Array.set(resultArray, i, elementValue);
             }
 
         }
@@ -83,14 +92,19 @@ public class ObjectReader {
                     resultArray.add(this.parseArrayList((List<?>) jsonValue, argType));
                 } else {
                     Class<?> typeClass = Class.forName(paramArguments[0].getTypeName());
-                    Object elementValue = this.getPrimaryTypeValue(typeClass, jsonValue);
+                    IObjectAdapter adapter = ObjectAdapters.getAllAdapters()
+                            .stream()
+                            .filter(objectAdapter -> objectAdapter.canAdapt(typeClass))
+                            .findFirst()
+                            .orElse(null);
 
-                    if (elementValue == null) {
-                        elementValue = typeClass.newInstance();
+                    if(adapter != null) {
+                        resultArray.add(adapter.startAdapt(jsonValue));
+                    } else {
+                        Object elementValue = typeClass.newInstance();
                         this.parseObjectType(elementValue, (JsonObject) jsonValue);
+                        resultArray.add(elementValue);
                     }
-
-                    resultArray.add(elementValue);
                 }
             } else {
                 System.out.println("Ошибка! Неопознанный тип объекта! " + type.getTypeName());
@@ -99,32 +113,6 @@ public class ObjectReader {
         }
 
         return resultArray;
-    }
-
-
-    public Object getPrimaryTypeValue(Class<?> clazz, Object needParseValue) {
-
-        if (clazz.isAssignableFrom(int.class) || clazz.isAssignableFrom(Integer.class)) {
-            return Integer.parseInt(needParseValue.toString().trim());
-        } else if (clazz.isAssignableFrom(double.class) || clazz.isAssignableFrom(Double.class)) {
-            return Double.parseDouble(needParseValue.toString().trim());
-        } else if (clazz.isAssignableFrom(boolean.class) || clazz.isAssignableFrom(Boolean.class)) {
-            return Boolean.parseBoolean(needParseValue.toString().trim());
-        } else if (clazz.isAssignableFrom(long.class) || clazz.isAssignableFrom(Long.class)) {
-            return Long.parseLong(needParseValue.toString().trim());
-        } else if (clazz.isAssignableFrom(float.class) || clazz.isAssignableFrom(Float.class)) {
-            return Float.parseFloat(needParseValue.toString().trim());
-        } else if (clazz.isAssignableFrom(short.class) || clazz.isAssignableFrom(Short.class)) {
-            return Short.parseShort(needParseValue.toString().trim());
-        } else if (clazz.isAssignableFrom(byte.class) || clazz.isAssignableFrom(Byte.class)) {
-            return Byte.parseByte(needParseValue.toString().trim());
-        } else if (clazz.isAssignableFrom(char.class) || clazz.isAssignableFrom(Character.class)) {
-            return needParseValue.toString().charAt(0);
-        } else if (clazz.isAssignableFrom(String.class)) {
-            return needParseValue.toString();
-        }
-
-        return null;
     }
 
 

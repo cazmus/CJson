@@ -1,6 +1,6 @@
 package ru.cazmusw.json.reader;
 
-import ru.cazmusw.json.utils.JsonConstants;
+import ru.cazmusw.json.utils.JsonToken;
 import ru.cazmusw.json.utils.JsonObject;
 
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ public class JsonParser {
 
     private int indexOf(String input, char character) {
         for (int i = 0; i < input.length(); i++) {
-            if (input.charAt(i) == character && (i == 0 || input.charAt(i - 1) != JsonConstants.IGNORE_RULES)) {
+            if (input.charAt(i) == character && (i == 0 || input.charAt(i - 1) != JsonToken.IGNORE_RULES)) {
                 return i;
             }
         }
@@ -23,8 +23,8 @@ public class JsonParser {
         int startIndex = this.indexOf(json, startChar);
 
         for (int i = startIndex + 1; i < json.length(); i++) {
-            if (json.charAt(i) == JsonConstants.STRING_STORAGE && (i == 0 || json.charAt(i - 1) != JsonConstants.IGNORE_RULES)) {
-                i = this.indexOf(json.substring(i + 1), JsonConstants.STRING_STORAGE) + i + 1;
+            if (json.charAt(i) == JsonToken.STRING_STORAGE && (i == 0 || json.charAt(i - 1) != JsonToken.IGNORE_RULES)) {
+                i = this.indexOf(json.substring(i + 1), JsonToken.STRING_STORAGE) + i + 1;
             } else if (json.charAt(i) == startChar) {
                 jsonSectionValue++;
             } else if (json.charAt(i) == endChar) {
@@ -43,13 +43,13 @@ public class JsonParser {
 
         for (int i = 0; i < json.length(); i++) {
             char totalCharacter = json.charAt(i);
-            if (totalCharacter == JsonConstants.SECTION_START) {
-                i = findEndCharIndex(json, JsonConstants.SECTION_START, JsonConstants.SECTION_END);
-            } else if (totalCharacter == JsonConstants.ARRAY_START) {
-                i = findEndCharIndex(json, JsonConstants.ARRAY_START, JsonConstants.ARRAY_END);
-            } else if (totalCharacter == JsonConstants.STRING_STORAGE && (i == 0 || json.charAt(i - 1) != JsonConstants.IGNORE_RULES)) {
-                i = this.indexOf(json.substring(i + 1), JsonConstants.STRING_STORAGE) + i + 1;
-            } else if (totalCharacter == JsonConstants.SEPARATOR) {
+            if (totalCharacter == JsonToken.SECTION_START) {
+                i = findEndCharIndex(json, JsonToken.SECTION_START, JsonToken.SECTION_END);
+            } else if (totalCharacter == JsonToken.ARRAY_START) {
+                i = findEndCharIndex(json, JsonToken.ARRAY_START, JsonToken.ARRAY_END);
+            } else if (totalCharacter == JsonToken.STRING_STORAGE && (i == 0 || json.charAt(i - 1) != JsonToken.IGNORE_RULES)) {
+                i = this.indexOf(json.substring(i + 1), JsonToken.STRING_STORAGE) + i + 1;
+            } else if (totalCharacter == JsonToken.SEPARATOR) {
                 return i;
             }
         }
@@ -69,7 +69,7 @@ public class JsonParser {
 
             String parsedSectionValue = json.substring(0, sectionEnd + 1);
 
-            if (parsedSectionValue.endsWith(String.valueOf(JsonConstants.SEPARATOR))) {
+            if (parsedSectionValue.endsWith(String.valueOf(JsonToken.SEPARATOR))) {
                 parsedSectionValue = parsedSectionValue.substring(0, parsedSectionValue.length() - 1);
             }
 
@@ -88,24 +88,26 @@ public class JsonParser {
 
         for (String section : data) {
 
-            int startSectionNameIndex = this.indexOf(section, JsonConstants.STRING_STORAGE);
-            int endSectionNameIndex = this.indexOf(section.substring(startSectionNameIndex + 1), JsonConstants.STRING_STORAGE) + startSectionNameIndex + 1;
+            int startSectionNameIndex = this.indexOf(section, JsonToken.STRING_STORAGE);
+            int endSectionNameIndex = this.indexOf(section.substring(startSectionNameIndex + 1), JsonToken.STRING_STORAGE) + startSectionNameIndex + 1;
 
             String sectionName = section.substring(startSectionNameIndex + 1, endSectionNameIndex);
-            String sectionValue = section.substring(this.indexOf(section, JsonConstants.KEY_VALUE_SEPARATOR) + 1).trim();
+            String sectionValue = section.substring(this.indexOf(section, JsonToken.VALUE_SEPARATOR) + 1).trim();
 
-            if (sectionValue.startsWith(String.valueOf(JsonConstants.SECTION_START))) {
+            if (sectionValue.startsWith(String.valueOf(JsonToken.SECTION_START))) {
                 JsonObject obj = new JsonObject();
                 this.parseSection(sectionValue, obj);
                 jsonObject.getData().put(sectionName, obj);
-            } else if (sectionValue.startsWith(String.valueOf(JsonConstants.ARRAY_START))) {
+            } else if (sectionValue.startsWith(String.valueOf(JsonToken.ARRAY_START))) {
                 List<Object> arrayList = new ArrayList<>();
                 this.parseArray(sectionValue, arrayList);
                 jsonObject.getData().put(sectionName, arrayList);
             } else {
-                ISectionReadAdapter adapter = SectionReadAdapters.getAllAdapters().stream()
+                ISectionReadAdapter adapter = SectionReadAdapters.getAllAdapters()
+                        .stream()
                         .filter(iSectionAdapter -> iSectionAdapter.canAdapt(sectionValue))
-                        .findFirst().orElse(null);
+                        .findFirst()
+                        .orElse(null);
 
 
                 if (adapter == null) {
@@ -124,11 +126,11 @@ public class JsonParser {
 
         for (String sectionValue : data) {
 
-            if (sectionValue.startsWith(String.valueOf(JsonConstants.SECTION_START))) {
+            if (sectionValue.startsWith(String.valueOf(JsonToken.SECTION_START))) {
                 JsonObject obj = new JsonObject();
                 this.parseSection(sectionValue, obj);
                 list.add(obj);
-            } else if (sectionValue.startsWith(String.valueOf(JsonConstants.ARRAY_START))) {
+            } else if (sectionValue.startsWith(String.valueOf(JsonToken.ARRAY_START))) {
                 List<Object> arrayList = new ArrayList<>();
                 this.parseArray(sectionValue, arrayList);
                 list.add(arrayList);
