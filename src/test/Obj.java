@@ -7,6 +7,7 @@ public class Obj {
     public boolean hh;
     @JsonSection(title = "dsfsdf")
     public Obj2 obj2;
-
+    @JsonSection(title = "megaArray", comment = "Данное поле проверочное")
+    public int[][][] megaArray;
 
 }

@@ -30,79 +30,77 @@ public class ObjectReader {
         if (field.getType().isPrimitive() || field.getType().isAssignableFrom(String.class)) {
             field.set(object, this.getPrimaryTypeValue(field.getType(), jsonObject.getData().get(title)));
         } else if (field.getType().isArray()) {
-
-            List<?> jsonValues = (List<?>) jsonObject.getData().get(title);
-
-            Object resultArray = Array.newInstance(field.getType().getComponentType(), jsonValues.size());
-
-            for (int i = 0; i < jsonValues.size(); i++) {
-                Object jsonValue = jsonValues.get(i);
-
-                Object elementValue = this.getPrimaryTypeValue(field.getType().getComponentType(), jsonValue);
-
-                if (elementValue == null) {
-
-                    elementValue = field.getType().getComponentType().newInstance();
-                    this.parseObjectType(elementValue, (JsonObject) jsonValue);
-                }
-                Array.set(resultArray, i, elementValue);
-            }
-            field.set(object, resultArray);
+            field.set(object, this.parseArray((List<?>) jsonObject.getData().get(title), field.getType().getComponentType()));
         } else if (field.getType().isAssignableFrom(List.class) || field.getType().isAssignableFrom(ArrayList.class)) {
-            List<?> jsonValues = (List<?>) jsonObject.getData().get(title);
-            ArrayList<Object> resultArray = new ArrayList<>();
-
-            for (Object jsonValue : jsonValues) {
-
-
-                ParameterizedTypeImpl parameterizedType = (ParameterizedTypeImpl) field.getGenericType();
-                Type[] paramArguments = parameterizedType.getActualTypeArguments();
-                Class<?> typeClass = Class.forName(paramArguments[0].getTypeName());
-                Object elementValue = this.getPrimaryTypeValue(typeClass, jsonValue);
-
-                if (elementValue == null) {
-                    elementValue = typeClass.newInstance();
-                    this.parseObjectType(elementValue, (JsonObject) jsonValue);
-                }
-
-                resultArray.add(elementValue);
-            }
-            field.set(object, resultArray);
-
+            field.set(object, this.parseArrayList((List<?>) jsonObject.getData().get(title), field.getGenericType()));
         } else if (field.getType().isAssignableFrom(Map.class) || field.getType().isAssignableFrom(HashMap.class)) {
-            List<?> jsonValues = (List<?>) jsonObject.getData().get(title);
-            HashMap<Object, Object> resultMap = new HashMap<>();
 
-            for (Object jsonValue : jsonValues) {
-
-                ParameterizedTypeImpl parameterizedType = (ParameterizedTypeImpl) field.getGenericType();
-                Type[] paramArguments = parameterizedType.getActualTypeArguments();
-                Class<?> typeClass = Class.forName(paramArguments[0].getTypeName());
-                Class<?> valueClass = Class.forName(paramArguments[1].getTypeName());
-
-                Object keyValue = this.getPrimaryTypeValue(typeClass, ((JsonObject) jsonValue).getData().get("key"));
-
-                if (keyValue == null) {
-                    keyValue = typeClass.newInstance();
-                    this.parseObjectType(keyValue, (JsonObject) ((JsonObject) jsonValue).getData().get("key"));
-                }
-
-                Object elementValue = this.getPrimaryTypeValue(valueClass, ((JsonObject) jsonValue).getData().get("value"));
-
-                if (elementValue == null) {
-                    elementValue = valueClass.newInstance();
-                    this.parseObjectType(elementValue, (JsonObject) ((JsonObject) jsonValue).getData().get("value"));
-                }
-
-                resultMap.put(keyValue, elementValue);
-            }
-            field.set(object, resultMap);
         } else {
             Object result = field.getType().newInstance();
             this.parseObjectType(result, (JsonObject) jsonObject.getData().get(title));
             field.set(object, result);
         }
     }
+
+    public Object parseArray(List<?> jsonValues, Class<?> type) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+
+        Object resultArray = Array.newInstance(type, jsonValues.size());
+
+        for (int i = 0; i < jsonValues.size(); i++) {
+            Object jsonValue = jsonValues.get(i);
+
+            if (type.isArray()) {
+                Array.set(resultArray, i, this.parseArray((List<?>) jsonValue, type.getComponentType()));
+            } else {
+                Object elementValue = this.getPrimaryTypeValue(type, jsonValue);
+
+                if (elementValue == null) {
+
+                    elementValue = type.newInstance();
+                    this.parseObjectType(elementValue, (JsonObject) jsonValue);
+
+                }
+                Array.set(resultArray, i, elementValue);
+            }
+
+        }
+
+        return resultArray;
+    }
+
+    public ArrayList<Object> parseArrayList(List<?> jsonValues, Type type) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
+
+        ArrayList<Object> resultArray = new ArrayList<>();
+
+        for (Object jsonValue : jsonValues) {
+            if (type instanceof ParameterizedTypeImpl) {
+                ParameterizedTypeImpl parameterizedType = (ParameterizedTypeImpl) type;
+                Type[] paramArguments = parameterizedType.getActualTypeArguments();
+
+                Type argType = paramArguments[0];
+
+                if (argType instanceof ParameterizedTypeImpl) {
+                    resultArray.add(this.parseArrayList((List<?>) jsonValue, argType));
+                } else {
+                    Class<?> typeClass = Class.forName(paramArguments[0].getTypeName());
+                    Object elementValue = this.getPrimaryTypeValue(typeClass, jsonValue);
+
+                    if (elementValue == null) {
+                        elementValue = typeClass.newInstance();
+                        this.parseObjectType(elementValue, (JsonObject) jsonValue);
+                    }
+
+                    resultArray.add(elementValue);
+                }
+            } else {
+                System.out.println("Ошибка! Неопознанный тип объекта! " + type.getTypeName());
+            }
+
+        }
+
+        return resultArray;
+    }
+
 
     public Object getPrimaryTypeValue(Class<?> clazz, Object needParseValue) {
 

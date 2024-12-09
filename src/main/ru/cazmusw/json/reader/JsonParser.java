@@ -4,7 +4,6 @@ import ru.cazmusw.json.utils.JsonConstants;
 import ru.cazmusw.json.utils.JsonObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class JsonParser {
@@ -104,8 +103,7 @@ public class JsonParser {
                 this.parseArray(sectionValue, arrayList);
                 jsonObject.getData().put(sectionName, arrayList);
             } else {
-                ISectionReadAdapter adapter = Arrays.stream(SectionReadAdapters.values())
-                        .map(sectionReadAdapters -> sectionReadAdapters.sectionAdapter)
+                ISectionReadAdapter adapter = SectionReadAdapters.getAllAdapters().stream()
                         .filter(iSectionAdapter -> iSectionAdapter.canAdapt(sectionValue))
                         .findFirst().orElse(null);
 
@@ -135,8 +133,7 @@ public class JsonParser {
                 this.parseArray(sectionValue, arrayList);
                 list.add(arrayList);
             } else {
-                ISectionReadAdapter adapter = Arrays.stream(SectionReadAdapters.values())
-                        .map(sectionReadAdapters -> sectionReadAdapters.sectionAdapter)
+                ISectionReadAdapter adapter = SectionReadAdapters.getAllAdapters().stream()
                         .filter(iSectionAdapter -> iSectionAdapter.canAdapt(sectionValue))
                         .findFirst().orElse(null);
 

@@ -33,8 +33,6 @@ public class JsonFile {
         }
     }
 
-
-    @Deprecated
     public void readObject(Object object) {
 
         JsonObject jsonObject = this.readAsJsonObject();

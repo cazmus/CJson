@@ -24,10 +24,19 @@ public class Main {
 
         Obj obj = new Obj();
 
-        //Данная функция находится ещё в разработке, не работает с многомерными массивами и списками
         jsonFile.readObject(obj);
 
         System.out.println("Пример чтения данных и автоматической записи их в объект " + obj.obj2.name + " " + obj.gg + " " + obj.hh);
+
+        for (int[][] f : obj.megaArray) {
+            for (int[] f1 : f) {
+                for (int f2 : f1) {
+                    System.out.print(f2 + " ");
+                }
+                System.out.println();
+            }
+            System.out.println();
+        }
 
     }
 }
